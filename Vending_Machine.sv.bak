@@ -1,0 +1,69 @@
+module Vending_Machine(
+	i_clk,
+	i_nickle,      // ¢5 input
+	i_dime,        // ¢10 input
+	i_quarter,     // ¢25 input
+	o_soda,   // Output soda
+	o_change,  // Change
+	reset_n		//reset
+);
+
+input i_clk;
+input i_nickle;	
+input i_dime;		
+input i_quarter;	
+output reg 		  o_soda;	
+output reg [2:0] o_change;
+input reset_n;
+
+reg [3:0] money;  //Total money currently
+
+always @(posedge i_clk or negedge reset_n) begin
+	if (!reset_n) begin
+		money		<= 4'b0000;
+		o_change <= 3'b000;
+		o_soda 	<= 1'b0;
+	end else begin
+		if (i_nickle) 
+			money  <= money + 4'b0001;
+		else if (i_dime)
+			money  <= money + 4'b0010;
+		else if (i_quarter)
+			money  <= money + 4'b0101;		
+		if (money >= 4'b0100) begin
+			case (money)
+				4'b0101: begin
+						o_change <= 3'b001;  // ¢5
+						o_soda <= 1'b1;  		// Drop soda
+					end	
+				4'b0110: begin
+						o_change <= 3'b010; 	// ¢10
+						o_soda <= 1'b1;  		// Drop soda
+					end	
+				4'b0111: begin
+						o_change <= 3'b011; 	// ¢15
+						o_soda <= 1'b1;  		// Drop soda
+					end	
+				4'b1000: begin
+						o_change <= 3'b100; 	// ¢20
+						o_soda <= 1'b1;  		// Drop soda
+					end	
+				default: begin
+						o_change <= 3'b000; 	// No change
+						o_soda <= 1'b1;  		// Drop soda
+					end	
+			endcase
+			if (o_soda) begin
+				o_change <= 3'b000;
+				money <= 4'b0000;
+				o_soda <= 1'b0;
+			end	
+		end 
+		else begin
+			o_change <= 3'b000;
+			o_soda <= 1'b0;			
+		end 
+	end	
+end	
+
+endmodule

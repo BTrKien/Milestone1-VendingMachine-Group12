@@ -1,0 +1,41 @@
+module VendingMachine(
+	i_clk,
+	i_nickle,      // ¢5 input
+	i_dime,        // ¢10 input
+	i_quarter,     // ¢25 input
+	o_soda,   // Output soda
+	o_change  // Change
+);
+
+input i_clk;
+input i_nickle;	
+input i_dime;		
+input i_quarter;	
+output reg 		  o_soda;	
+output reg [2:0] o_change;
+
+reg [2:0] money;  //Total money currently
+
+always @(posedge i_clk) begin
+	if (i_nickle) 
+		money  <= money + 3'b001;
+	else if (i_dime)
+		money  <= money + 3'b010;
+	else if (i_quarter)
+		money  <= money + 3'b101;		
+	if (money >= 3'b100) begin
+		o_soda <= 1'b1;  				// Drop soda
+		money  <= money - 3'b100;	// Calculate change
+	end else begin
+		o_soda <= 1'b0;  
+	end
+	case (money)
+		3'b001: o_change <= 3'b001;  // ¢5 
+		3'b010: o_change <= 3'b010; // ¢10 
+		3'b011: o_change <= 3'b011; // ¢15 
+		3'b100: o_change <= 3'b100; // ¢20 
+		default: o_change <= 3'b000; // No change
+	endcase
+end
+
+endmodule
